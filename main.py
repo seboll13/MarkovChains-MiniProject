@@ -134,9 +134,30 @@ class states_fn():
         self.indices[self.id_chosen] = x_next_move*self.N + y_next_move
 
 
-if __name__ == '__main__':                
+    def next_move_3(self):
+        self.id_chosen = np.random.randint(0,self.N) # pick uniformly at random the id of the queen that will be moved
+        p = np.zeros(self.N) # array of the metropolis chain probabilities
+        psi = 1/self.N # uniform probability of the base chain 
+
+        for ii in range(self.N):
+            if self.coords[self.id_chosen][1] != ii: # check that next state is not the previous one
+                eventual_confl = self.conflict_calc(self.coords[self.id_chosen][0],ii) # conflict of the next state
+                a = min(1,exp(-self.beta*(eventual_confl-self.conflict))) # acceptance probability 
+                p[ii] = psi*a # metropolis chain probability to go to the next state
+
+        p[self.coords[self.id_chosen][1]] = 1-np.sum(p)
+
+        next_column = np.random.choice(self.N,p = p) # now find the next move
+
+        self.conflict = self.conflict_calc(self.coords[self.id_chosen][0],next_column)
+        print(self.conflict)
+        self.coords[self.id_chosen] = np.array([self.coords[self.id_chosen][0],next_column])
+        self.indices[self.id_chosen] = self.coords[self.id_chosen][0]*self.N + next_column
+
+
+if __name__ == '__main__':            
     _class = states_fn()
     _class.coords, _class.indices = _class.initialize_chain()
     while _class.conflict != 0:
-        _class.next_move_2()
+        _class.next_move_3()
     print(_class.coords)
