@@ -156,7 +156,7 @@ class states_fn():
 
 
 if __name__ == '__main__':            
-    _class = states_fn()
+    _class = states_fn(beta=1.5, N=100)
     _class.coords, _class.indices = _class.initialize_chain()
     while _class.conflict != 0:
         _class.next_move_3()
