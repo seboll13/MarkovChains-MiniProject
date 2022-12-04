@@ -93,22 +93,6 @@ class NQueens:
                     conflicts += 1
         return conflicts
 
-    def single_queen_conflitto_calculator(self, queen_id) -> int:
-        conflittos = 0
-        for i in range(self.N):
-            if i != queen_id:
-                # diagonal calculator
-                if abs(self.q_coordinates[queen_id][0] - self.q_coordinates[i][0]) == abs(
-                        self.q_coordinates[queen_id][1] - self.q_coordinates[i][1]):
-                    conflittos += 1
-                # same row
-                elif self.q_coordinates[queen_id][0] == self.q_coordinates[i][0]:
-                    conflittos += 1
-                # same column
-                elif self.q_coordinates[queen_id][1] == self.q_coordinates[i][1]:
-                    conflittos += 1
-        return conflittos
-
 
     def diagonal_conflict_calculator(self) -> int:
         """ This function calculates the total number of conflicts on the board."""
