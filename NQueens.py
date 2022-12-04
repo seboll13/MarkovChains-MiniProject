@@ -1,4 +1,5 @@
 import numpy as np
+from math import exp
 
 
 class bcolors:
@@ -147,14 +148,40 @@ class NQueens:
             print()
         return
 
+    def move(self):
+        # 1) pick uniformly at random a couple of queens
+        # 2) calculate the acceptance probability by using the conflict function
+        # 3) check if the move has to be done
 
-if __name__ == "__main__":
-    board = NQueens(N=8)
-    board.knight_initialisation()
-    print(f'---Board initialisation of size: {board.N}x{board.N}---')
-    print('- Board:')
-    board.display_board()
-    print(f'- Total conflicts: {board.num_conflicts}')
+        q1_id, q2_id = np.random.choice(self.N, 2, replace=False)
+
+        r1_old, c1_old = self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1]
+        r2_old, c2_old = self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1]
+
+        eventual_conflict = self.num_conflicts - 2*self.single_queen_conflict_calculator(q1_id) \
+        -2*self.single_queen_conflict_calculator(q2_id)
+
+        r1_new, c1_new = r2_old, c1_old
+        r2_new, c2_new = r1_old, c2_old
+
+        self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1] = r1_new, c1_new
+        self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1] = r2_new, c2_new
+
+        eventual_conflict += 2*self.single_queen_conflict_calculator(q1_id) \
+        +2*self.single_queen_conflict_calculator(q2_id)
+
+        a = min(1, exp(-self.beta*(eventual_conflict-self.num_conflicts))) # acceptance probability
+
+        if (np.random.uniform() < a):
+            # in this case the move is made
+            self.num_conflicts = eventual_conflict
+        else:
+            # the move is not made
+            self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1] = r1_old, c1_old
+            self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1] = r2_old, c2_old
+
+
+def bruteforce(board) -> None:
     print('- Running dummy bruteforce algorithm...')
     avg_iterations = 0
     for _ in range(100):
@@ -162,6 +189,35 @@ if __name__ == "__main__":
         board.knight_initialisation()
     avg_iterations /= 100
     print(f'Average iterations: {avg_iterations}')
+
+
+def simulated_annealing(board) -> None:
+    print('- Running simulated annealing algorithm...')
+    i = 0
+    while(board.num_conflicts > 0):
+        board.move()
+        if i % 1000 == 0:
+            print(f'Iteration {i}, conflicts: {board.num_conflicts}')
+        i+=1
+    assert board.is_safe()
+    return
+
+if __name__ == "__main__":
+    board = NQueens(beta = 1, N=50)
+    board.knight_initialisation()
+    print(f'---Board initialisation of size: {board.N}x{board.N}---')
+    print('- Board:')
+    board.display_board()
+    print(f'- Total conflicts: {board.num_conflicts}')
+    
+    # Run Seb's version (without beta)
+    #bruteforce(board)
+
+    # Run Lorenzo's version
+    simulated_annealing(board)
+    
     # print('- Final board:')
     # board.display_board()
     print('Done')
+    #print(board.q_coordinates)
+
