@@ -83,6 +83,32 @@ class NQueens:
         return (self.q_coordinates, self.q_indices)
     
 
+    def swap_queens(self) -> None:
+        """ This function selects two queens at random from the board and swaps their vertical positions. """
+        # select two queens at random
+        q1_id, q2_id = np.random.choice(self.N, 2, replace=False)
+        # swap the y coordinates of both queens
+        self.q_coordinates[q1_id][1], self.q_coordinates[q2_id][1] = self.q_coordinates[q2_id][1], self.q_coordinates[q1_id][1]
+        # update the indices
+        self.q_indices[q1_id], self.q_indices[q2_id] = self.q_indices[q2_id], self.q_indices[q1_id]
+        # update the number of conflicts
+        self.num_conflicts = self.diagonal_conflict_calculator()
+        return
+    
+
+    def bruteforce_run(self, max_iter=1_000, verbose=False) -> int:
+        """ This function runs the algorithm for a given number of iterations."""
+        for i in range(max_iter):
+            if verbose:
+                print(f"Conflicts: {self.num_conflicts}")
+            if self.num_conflicts == 0:
+                print(f"Solution found in {i} iterations")
+                return i
+            self.swap_queens()
+        print(f'No solution found after {max_iter} iterations')
+        return -1
+    
+
     def single_queen_conflict_calculator(self, queen_id) -> int:
         """ This function calculates the number of conflicts for a single queen."""
         conflicts = 0
@@ -123,11 +149,19 @@ class NQueens:
 
 
 if __name__ == "__main__":
-    board = NQueens(N=16)
+    board = NQueens(N=8)
     board.knight_initialisation()
     print(f'---Board initialisation of size: {board.N}x{board.N}---')
-    print(f'- 2D positions of each queen: {board.q_coordinates}')
-    print(f'- 1D positions of each queen: {board.q_indices}')
-    print(f'- Total conflicts: {board.num_conflicts}')
     print('- Board:')
     board.display_board()
+    print(f'- Total conflicts: {board.num_conflicts}')
+    print('- Running dummy bruteforce algorithm...')
+    avg_iterations = 0
+    for _ in range(100):
+        avg_iterations += board.bruteforce_run(max_iter=100_000)
+        board.knight_initialisation()
+    avg_iterations /= 100
+    print(f'Average iterations: {avg_iterations}')
+    # print('- Final board:')
+    # board.display_board()
+    print('Done')
