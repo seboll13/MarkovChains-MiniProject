@@ -1,4 +1,5 @@
 import numpy as np
+from math import exp
 
 
 class bcolors:
@@ -121,13 +122,59 @@ class NQueens:
             print()
         return
 
+    def move(self):
+        # 1) pick uniformely at random a couple of queens
+        # 2) calculate the acceptance probability by using the conflict function
+        # 3) check if the move has to be done
+
+        flag = True
+        while flag == True:
+            id_1 = np.random.randint(0,self.N)
+            id_2 = np.random.randint(0,self.N)
+            if id_1 != id_2:
+                flag = False
+
+
+        r1_old, c1_old = self.q_coordinates[id_1][0], self.q_coordinates[id_1][1]
+        r2_old, c2_old = self.q_coordinates[id_2][0], self.q_coordinates[id_2][1]
+
+        eventual_conflict = self.num_conflicts - 2*self.single_queen_conflict_calculator(id_1) \
+        -2*self.single_queen_conflict_calculator(id_2)
+
+        r1_new, c1_new = r2_old, c1_old
+        r2_new, c2_new = r1_old, c2_old
+
+        self.q_coordinates[id_1][0], self.q_coordinates[id_1][1] = r1_new, c1_new
+        self.q_coordinates[id_2][0], self.q_coordinates[id_2][1] = r2_new, c2_new
+
+        eventual_conflict += 2*self.single_queen_conflict_calculator(id_1) \
+        +2*self.single_queen_conflict_calculator(id_2)
+
+        a = min(1, exp(-self.beta*(eventual_conflict-self.num_conflicts))) # acceptance probability
+
+        if (np.random.uniform() < a):
+            # in this case the move is made
+            self.num_conflicts = eventual_conflict
+        else:
+            # the move is not made
+            self.q_coordinates[id_1][0], self.q_coordinates[id_1][1] = r1_old, c1_old
+            self.q_coordinates[id_2][0], self.q_coordinates[id_2][1] = r2_old, c2_old
+
+
 
 if __name__ == "__main__":
-    board = NQueens(N=16)
+    board = NQueens(beta = 1, N=50)
     board.knight_initialisation()
     print(f'---Board initialisation of size: {board.N}x{board.N}---')
     print(f'- 2D positions of each queen: {board.q_coordinates}')
     print(f'- 1D positions of each queen: {board.q_indices}')
     print(f'- Total conflicts: {board.num_conflicts}')
     print('- Board:')
-    board.display_board()
+    #board.display_board()
+
+    while(board.num_conflicts != 0):
+        board.move()
+        print(board.num_conflicts)
+    assert board.is_safe()
+    #print(board.q_coordinates)
+
