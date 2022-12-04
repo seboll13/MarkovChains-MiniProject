@@ -1,5 +1,6 @@
 import numpy as np
 from math import exp
+import time
 
 
 class bcolors:
@@ -153,7 +154,23 @@ class NQueens:
         # 2) calculate the acceptance probability by using the conflict function
         # 3) check if the move has to be done
 
-        q1_id, q2_id = np.random.choice(self.N, 2, replace=False)
+        flag = True
+        while flag == True:
+            q1_id, q2_id = np.random.choice(self.N, 2, replace=False)
+            val_1 = self.single_queen_conflict_calculator(q1_id)*self.N/self.num_conflicts
+            val_2 = self.single_queen_conflict_calculator(q2_id)*self.N/self.num_conflicts
+            '''
+            if np.random.uniform() < 1-exp(-val_1) or np.random.uniform() < 1-exp(-val_2):
+                flag = False
+                print(val_1,val_2)
+            '''
+            if val_1 != 0 and val_2 != 0:
+                print(val_1, val_2, self.num_conflicts, q1_id, q2_id)
+                print(self.num_conflicts)
+                flag = False
+            elif val_1 != 0 or val_2 != 0:
+                if np.random.uniform() < 0.01:
+                    flag = False
 
         r1_old, c1_old = self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1]
         r2_old, c2_old = self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1]
@@ -194,16 +211,19 @@ def bruteforce(board) -> None:
 def simulated_annealing(board) -> None:
     print('- Running simulated annealing algorithm...')
     i = 0
+    avg = 0
     while(board.num_conflicts > 0):
         board.move()
+        avg += board.num_conflicts
         if i % 1000 == 0:
-            print(f'Iteration {i}, conflicts: {board.num_conflicts}')
+            print(f'Iteration {i}, conflicts: {avg/1000}')
+            avg = 0
         i+=1
     assert board.is_safe()
     return
 
 if __name__ == "__main__":
-    board = NQueens(beta = 1, N=50)
+    board = NQueens(beta = 1, N=1000)
     board.knight_initialisation()
     print(f'---Board initialisation of size: {board.N}x{board.N}---')
     print('- Board:')
@@ -214,7 +234,10 @@ if __name__ == "__main__":
     #bruteforce(board)
 
     # Run Lorenzo's version
+    start = time.time()
     simulated_annealing(board)
+    end = time.time()
+    print((end-start)/60,"minutes passed with",board.N, "queens")
     
     # print('- Final board:')
     # board.display_board()
