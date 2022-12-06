@@ -27,14 +27,16 @@ def performance_testing():
     diagonal_initial_times = []
     for num_queens in set_of_queens:
         avg_runtime = performance_analysis("diagonal",beta=1,num_queens=num_queens)
-        random_initial_times.append(avg_runtime)
+        diagonal_initial_times.append(avg_runtime)
     '''
     Calculating for the knight initial positioning!
     '''
     knight_initial_times = []
     for num_queens in set_of_queens:
         avg_runtime = performance_analysis("knight",beta=1,num_queens=num_queens)
-        random_initial_times.append(avg_runtime)
+        knight_initial_times.append(avg_runtime)
+
+    return random_initial_times,diagonal_initial_times,knight_initial_times
 
 
 
