@@ -1,6 +1,6 @@
 import numpy as np
 from math import exp
-import time
+from time import time
 
 
 class bcolors:
@@ -31,6 +31,9 @@ class NQueens:
         self.chosen = chosen
         # the number of conflicts on the board correspond to the sum of the number of conflicts for each queen
         self.num_conflicts = 0
+        # dictionnaries of (queen_id, was_conflicting) pairs
+        self.conflicting_queens = {}
+        self.non_conflicting_queens = {}
     
 
     # This property must be used to place queens on the board
@@ -47,7 +50,8 @@ class NQueens:
         """ This function initialises the board with all the queens on the main diagonal. """
         self.q_coordinates = np.array([(i,i) for i in range(self.N)])
         self.q_indices = np.array([i*(self.N + 1) for i in range(self.N)])
-        self.num_conflicts = self.diagonal_conflict_calculator()
+        self.num_conflicts = self.N * (self.N - 1)
+        self.conflicting_queens = {_: True for _ in range(self.N)}
         assert self.is_safe()
         return (self.q_coordinates, self.q_indices)
     
@@ -57,14 +61,6 @@ class NQueens:
         if self.N % 2 == 0 and y == self.N - 2:
             return (x+1, 1)
         return (x+1, (y+2) % self.N)
-    
-    
-    # TODO: work on placing queens at distinct positions
-    def random_knight_movement(self, x, y) -> tuple:
-        """ This function returns a randomly chosen new position from an initial starting position with respect to knight movements. """
-        sign = np.random.choice([-1, 1])
-        weight = np.random.choice([1, 2])
-        return ((x + sign*weight) % self.N, (y + sign*(3-weight)) % self.N)
 
     
     # better initialisation based on knight movements
@@ -149,12 +145,14 @@ class NQueens:
             print()
         return
 
+
     def move(self):
         # 1) pick uniformly at random a couple of queens
         # 2) calculate the acceptance probability by using the conflict function
         # 3) check if the move has to be done
 
         flag = True
+
         while flag == True:
             q1_id, q2_id = np.random.choice(self.N, 2, replace=False)
             val_1 = self.single_queen_conflict_calculator(q1_id)*self.N/self.num_conflicts
@@ -165,8 +163,7 @@ class NQueens:
                 print(val_1,val_2)
             '''
             if val_1 != 0 and val_2 != 0:
-                print(val_1, val_2, self.num_conflicts, q1_id, q2_id)
-                print(self.num_conflicts)
+                #print(val_1, val_2, self.num_conflicts, q1_id, q2_id)
                 flag = False
             elif val_1 != 0 or val_2 != 0:
                 if np.random.uniform() < 0.01:
@@ -175,8 +172,7 @@ class NQueens:
         r1_old, c1_old = self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1]
         r2_old, c2_old = self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1]
 
-        eventual_conflict = self.num_conflicts - 2*self.single_queen_conflict_calculator(q1_id) \
-        -2*self.single_queen_conflict_calculator(q2_id)
+        eventual_conflict = self.num_conflicts - 2*(self.single_queen_conflict_calculator(q1_id) + self.single_queen_conflict_calculator(q2_id))
 
         r1_new, c1_new = r2_old, c1_old
         r2_new, c2_new = r1_old, c2_old
@@ -184,8 +180,7 @@ class NQueens:
         self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1] = r1_new, c1_new
         self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1] = r2_new, c2_new
 
-        eventual_conflict += 2*self.single_queen_conflict_calculator(q1_id) \
-        +2*self.single_queen_conflict_calculator(q2_id)
+        eventual_conflict += 2*(self.single_queen_conflict_calculator(q1_id) + self.single_queen_conflict_calculator(q2_id))
 
         a = min(1, exp(-self.beta*(eventual_conflict-self.num_conflicts))) # acceptance probability
 
@@ -198,46 +193,47 @@ class NQueens:
             self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1] = r2_old, c2_old
 
 
-def bruteforce(board) -> None:
-    print('- Running dummy bruteforce algorithm...')
-    avg_iterations = 0
-    for _ in range(100):
-        avg_iterations += board.bruteforce_run(max_iter=100_000)
-        board.knight_initialisation()
-    avg_iterations /= 100
-    print(f'Average iterations: {avg_iterations}')
+    def bruteforce(self) -> None:
+        print('- Running dummy bruteforce algorithm...')
+        avg_iterations = 0
+        for _ in range(100):
+            avg_iterations += board.bruteforce_run(max_iter=100_000)
+            self.knight_initialisation()
+        avg_iterations /= 100
+        print(f'Average iterations: {avg_iterations}')
 
 
-def simulated_annealing(board) -> None:
-    print('- Running simulated annealing algorithm...')
-    i = 0
-    avg = 0
-    while(board.num_conflicts > 0):
-        board.move()
-        avg += board.num_conflicts
-        if i % 1000 == 0:
-            print(f'Iteration {i}, conflicts: {avg/1000}')
-            avg = 0
-        i+=1
-    assert board.is_safe()
-    return
+    def simulated_annealing(self) -> None:
+        print('- Running simulated annealing algorithm...')
+        i = 0
+        avg = 0
+        while(self.num_conflicts > 0):
+            self.move()
+            avg += self.num_conflicts
+            if i % 100 == 0:
+                print(f'Swap {i}, avg conflicts: {avg/1000}')
+                avg = 0
+            i+=1
+        assert self.is_safe()
+        return
+
 
 if __name__ == "__main__":
-    board = NQueens(beta = 1, N=1000)
-    board.knight_initialisation()
+    board = NQueens(beta = 1, N=100)
+    board.main_diagonal_initialisation()
     print(f'---Board initialisation of size: {board.N}x{board.N}---')
-    print('- Board:')
-    board.display_board()
+    # print('- Board:')
+    # board.display_board()
     print(f'- Total conflicts: {board.num_conflicts}')
     
     # Run Seb's version (without beta)
     #bruteforce(board)
 
     # Run Lorenzo's version
-    start = time.time()
-    simulated_annealing(board)
-    end = time.time()
-    print((end-start)/60,"minutes passed with",board.N, "queens")
+    start = time()
+    board.simulated_annealing()
+    end = time()
+    print(f'Runtime : {end-start:.3f} seconds for {board.N} queens')
     
     # print('- Final board:')
     # board.display_board()
