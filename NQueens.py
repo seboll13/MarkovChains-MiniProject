@@ -2,6 +2,11 @@ import numpy as np
 from math import exp
 from time import time
 
+'''
+@todo
+1) optimise the swapping method -> our curr bottle-neck
+'''
+
 
 class bcolors:
     """ Class used to print colored text in the terminal"""

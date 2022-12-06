@@ -1,5 +1,9 @@
 '''
 This is the file for stress testing our algorithm through various iterations.
+
+@todo
+1) write visualisation tools methods
+2) optimise parameter testing -> utilise multiple cores and do it in parallel
 '''
 
 import numpy as np
