@@ -56,6 +56,18 @@ class NQueens:
         return (self.q_coordinates, self.q_indices)
     
 
+    def random_positions_initialisation(self) -> tuple:
+        """ This function randomly puts queens on the board, whilst preserving the no row/column conflict contraint. """
+        a, b = np.arange(self.N), np.arange(self.N)
+        np.random.shuffle(a)
+        np.random.shuffle(b)
+        self.q_coordinates = np.array([(a[i], b[i]) for i in range(self.N)])
+        self.q_indices = np.array([a[i] + i*self.N for i in range(self.N)])
+        self.num_conflicts = self.diagonal_conflict_calculator()
+        assert self.is_safe()
+        return (self.q_coordinates, self.q_indices)
+    
+
     def default_se_knight_movement(self, x, y) -> tuple:
         """ This function returns a fixed new position from an initial starting position with respect to the south-east knight movement. """
         if self.N % 2 == 0 and y == self.N - 2:
@@ -94,32 +106,21 @@ class NQueens:
         return
     
 
-    def bruteforce_run(self, max_iter=1_000, verbose=False) -> int:
-        """ This function runs the algorithm for a given number of iterations."""
-        for i in range(max_iter):
-            if verbose:
-                print(f"Conflicts: {self.num_conflicts}")
-            if self.num_conflicts == 0:
-                print(f"Solution found in {i} iterations")
-                return i
-            self.swap_queens()
-        print(f'No solution found after {max_iter} iterations')
-        return -1
-    
-
-    def single_queen_conflict_calculator(self, queen_id) -> int:
+    def single_queen_conflict_calculator(self, queen_id) -> tuple:
         """ This function calculates the number of conflicts for a single queen."""
         conflicts = 0
+        conflicting_queens = set()
         for i in range(self.N):
             if i != queen_id:
                 if abs(self.q_coordinates[queen_id][0]-self.q_coordinates[i][0]) == abs(self.q_coordinates[queen_id][1]-self.q_coordinates[i][1]):
                     conflicts += 1
-        return conflicts
+                    conflicting_queens.add((i, queen_id))
+        return (conflicts, conflicting_queens)
 
 
     def diagonal_conflict_calculator(self) -> int:
         """ This function calculates the total number of conflicts on the board."""
-        return sum([self.single_queen_conflict_calculator(_) for _ in range(self.N)])
+        return sum([self.single_queen_conflict_calculator(_)[0] for _ in range(self.N)])
     
 
     def display_board(self) -> None:
@@ -135,7 +136,7 @@ class NQueens:
             for j in range(self.N):
                 if board[i, j] == 1:
                     # check for conflict
-                    if self.single_queen_conflict_calculator(qid) > 0:
+                    if self.single_queen_conflict_calculator(qid)[0] > 0:
                         print(bcolors.FAIL + '1' + bcolors.ENDC, end=' ')
                     else:
                         print(bcolors.OKGREEN + '1' + bcolors.ENDC, end=' ')
@@ -144,6 +145,18 @@ class NQueens:
                     print("0", end=" ")
             print()
         return
+    
+
+    def swap_dicts(self, conflicting_set):
+        """ This function changes a queens dictionnary."""
+        for q in conflicting_set:
+            if q in self.conflicting_queens:
+                self.conflicting_queens.remove(q)
+                self.non_conflicting_queens.add((q, True))
+            else:
+                self.non_conflicting_queens.remove(q)
+                self.conflicting_queens.add((q, False))
+        return
 
 
     def move(self):
@@ -151,12 +164,22 @@ class NQueens:
         # 2) calculate the acceptance probability by using the conflict function
         # 3) check if the move has to be done
 
+        # p1, p2 = 0.9, 0.99
+        # q = np.random.uniform(0, 1)
+        # if q < p1:
+        #     q1_id, q2_id = np.random.choice(self.conflicting_queens, 2, replace=False)
+        # elif q < p2:
+        #     q1_id = np.random.choice(self.conflicting_queens, 1)
+        #     q2_id = np.random.choice(self.non_conflicting_queens, 1)
+        # else:
+        #     q1_id, q2_id = np.random.choice(self.non_conflicting_queens, 2, replace=False)
+
         flag = True
 
         while flag == True:
             q1_id, q2_id = np.random.choice(self.N, 2, replace=False)
-            val_1 = self.single_queen_conflict_calculator(q1_id)*self.N/self.num_conflicts
-            val_2 = self.single_queen_conflict_calculator(q2_id)*self.N/self.num_conflicts
+            val_1 = self.single_queen_conflict_calculator(q1_id)[0]*self.N/self.num_conflicts
+            val_2 = self.single_queen_conflict_calculator(q2_id)[0]*self.N/self.num_conflicts
             '''
             if np.random.uniform() < 1-exp(-val_1) or np.random.uniform() < 1-exp(-val_2):
                 flag = False
@@ -172,7 +195,7 @@ class NQueens:
         r1_old, c1_old = self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1]
         r2_old, c2_old = self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1]
 
-        eventual_conflict = self.num_conflicts - 2*(self.single_queen_conflict_calculator(q1_id) + self.single_queen_conflict_calculator(q2_id))
+        eventual_conflict = self.num_conflicts - 2*(self.single_queen_conflict_calculator(q1_id)[0] + self.single_queen_conflict_calculator(q2_id)[0])
 
         r1_new, c1_new = r2_old, c1_old
         r2_new, c2_new = r1_old, c2_old
@@ -180,7 +203,7 @@ class NQueens:
         self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1] = r1_new, c1_new
         self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1] = r2_new, c2_new
 
-        eventual_conflict += 2*(self.single_queen_conflict_calculator(q1_id) + self.single_queen_conflict_calculator(q2_id))
+        eventual_conflict += 2*(self.single_queen_conflict_calculator(q1_id)[0] + self.single_queen_conflict_calculator(q2_id)[0])
 
         a = min(1, exp(-self.beta*(eventual_conflict-self.num_conflicts))) # acceptance probability
 
@@ -191,16 +214,7 @@ class NQueens:
             # the move is not made
             self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1] = r1_old, c1_old
             self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1] = r2_old, c2_old
-
-
-    def bruteforce(self) -> None:
-        print('- Running dummy bruteforce algorithm...')
-        avg_iterations = 0
-        for _ in range(100):
-            avg_iterations += board.bruteforce_run(max_iter=100_000)
-            self.knight_initialisation()
-        avg_iterations /= 100
-        print(f'Average iterations: {avg_iterations}')
+        return
 
 
     def simulated_annealing(self) -> None:
@@ -220,16 +234,12 @@ class NQueens:
 
 if __name__ == "__main__":
     board = NQueens(beta = 1, N=100)
-    board.main_diagonal_initialisation()
+    board.random_positions_initialisation()
     print(f'---Board initialisation of size: {board.N}x{board.N}---')
     # print('- Board:')
     # board.display_board()
     print(f'- Total conflicts: {board.num_conflicts}')
-    
-    # Run Seb's version (without beta)
-    #bruteforce(board)
 
-    # Run Lorenzo's version
     start = time()
     board.simulated_annealing()
     end = time()

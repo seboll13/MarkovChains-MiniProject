@@ -9,7 +9,7 @@ from NQueens import NQueens
 
 if __name__ == '__main__':
     board = NQueens(beta = 1, N=100)
-    board.main_diagonal_initialisation()
+    board.random_positions_initialisation()
 
     print(f'---Board initialisation of size: {board.N}x{board.N}---')
     print(f'- Total conflicts: {board.num_conflicts}')
@@ -23,7 +23,7 @@ if __name__ == '__main__':
         end = time()
         elapsed = end-start
         avg_runtime += elapsed
-        board.main_diagonal_initialisation()
+        board.random_positions_initialisation()
     print(f'Average runtime: {avg_runtime/5:.3f} seconds for {board.N} queens')
     print('Done')
 
