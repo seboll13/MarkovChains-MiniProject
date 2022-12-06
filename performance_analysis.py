@@ -6,13 +6,23 @@ This is the file for stress testing our algorithm through various iterations.
 2) optimise parameter testing -> utilise multiple cores and do it in parallel
 '''
 
-import numpy as np
-from math import exp
 from time import time
+from typing import List
+
 from NQueens import NQueens
+import matplotlib.pyplot as plt
+import numpy as np
+
+def visualise(num_queens_lst: List[int], lst_of_times: List[List[float]]):
+    # plot lines
+    for lst_time in lst_of_times:
+        plt.plot(lst_time,num_queens_lst)
+    plt.legend()
+    plt.show()
 
 def performance_testing():
-    set_of_queens = [10,20,30,40,50,60,70,80,90,100]
+    # set_of_queens = [10,20,30,40,50,60,70,80,90,100]
+    set_of_queens = [10,20,30]
 
     '''
     Calculating for the random initial positioning!
@@ -36,16 +46,20 @@ def performance_testing():
         avg_runtime = performance_analysis("knight",beta=1,num_queens=num_queens)
         knight_initial_times.append(avg_runtime)
 
-    return random_initial_times,diagonal_initial_times,knight_initial_times
+    visualise(set_of_queens,[random_initial_times,diagonal_initial_times,knight_initial_times])
+
+
+    # return random_initial_times,diagonal_initial_times,knight_initial_times
 
 
 
-'''
-initial_positioning = ["random","diagonal","knight"]
-beta = whatever number your heart desires
-num_queens = whatever number your heart desires
-'''
+
 def performance_analysis(initial_positioning:str, beta:int, num_queens:int):
+    '''
+    @param  initial_positioning : ["random","diagonal","knight"]
+    @param  beta = whatever number your heart desires
+    @param  num_queens = whatever number your heart desires
+    '''
     if initial_positioning == "random":
         board = NQueens(beta=beta, N=num_queens)
         board.random_positions_initialisation()
@@ -80,7 +94,10 @@ def performance_analysis(initial_positioning:str, beta:int, num_queens:int):
     return avg_runtime
 
 if __name__ == '__main__':
-    performance_analysis(initial_positioning="random",beta=1,num_queens=100)
+    # performance_analysis(initial_positioning="random",beta=1,num_queens=100)
+
+    performance_testing()
+
 # board = NQueens(beta = 1, N=100)
 # board.random_positions_initialisation()
 #
