@@ -46,6 +46,20 @@ def performance_testing():
         avg_runtime = performance_analysis("knight",beta=1,num_queens=num_queens)
         knight_initial_times.append(avg_runtime)
 
+
+    print('The tests were ran for the setting of ' + str(set_of_queens) + " queens.")
+    print()
+    print('For Random Board Initialisation:')
+    for res in random_initial_times:
+        print(res)
+    print()
+    print('For Knight Board Initialisation:')
+    for res in knight_initial_times:
+        print(res)
+    print()
+    print('For Diagonal Board Initialisation:')
+    for res in diagonal_initial_times:
+        print(res)
     visualise(set_of_queens,[random_initial_times,diagonal_initial_times,knight_initial_times])
 
 
