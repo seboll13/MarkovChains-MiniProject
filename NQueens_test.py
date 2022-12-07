@@ -336,7 +336,7 @@ class NQueens:
             self.move()
             avg += self.num_conflicts
             if i % 100 == 0:
-                print(f'Swap {i}, avg conflicts: {avg/1000}')
+                print(f'Swap {i}, avg conflicts: {avg/100}')
                 avg = 0
             i+=1
         assert self.is_safe()
