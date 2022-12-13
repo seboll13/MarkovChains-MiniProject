@@ -17,16 +17,16 @@ NUM_ITERATIONS = 10
 # 5. Compute the average of the X_i's and repeat the procedure till we reach beta_infty.
 # 6. The approximate number of solutions should be close enough to beta_infty.
 
+MAX_ITERATIONS = 1000
+
 if __name__ == '__main__':
     for beta in np.arange(1.0, MAX_T, 0.1):
         avg_times = 0
-        for _ in range(NUM_ITERATIONS):
-            board = NQueens(beta=beta, N=NUM_QUEENS)
-            board.main_diagonal_initialisation()
-            start = time()
-            board.simulated_annealing(False)
-            end = time()
-            avg_times += (end - start)
-        avg_times /= NUM_ITERATIONS
-        print(f'Run with beta={beta} took {avg_times:.3f} seconds on avg.')
+        board = NQueens(beta=beta, N=NUM_QUEENS)
+        board.main_diagonal_initialisation()
+        start = time()
+        num_iterations = board.simulated_annealing(False, limit=MAX_ITERATIONS)
+        end = time()
+        if num_iterations is not None:
+            print(f'Found a solution in {num_iterations} iterations with beta={beta}.')
     print('Done')

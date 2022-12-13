@@ -95,6 +95,7 @@ class NQueens:
             self.q_coordinates = np.append(self.q_coordinates, [(x, y)], axis=0)
             self.q_indices = np.append(self.q_indices, [x + i*self.N])
         self.num_conflicts = self.diagonal_conflict_calculator()
+        self.conflicting_queens = {_:self.single_queen_initial_conflicts(_) for _ in range(self.N)}
         assert self.is_safe()
         return (self.q_coordinates, self.q_indices)
     
@@ -340,43 +341,61 @@ class NQueens:
         return
 
 
-    def simulated_annealing(self, flag_print) -> None:
+    def simulated_annealing(self, flag_print, limit=None) -> int:
         if flag_print:
             print('- Running simulated annealing algorithm...')
         i = 0
         avg = 0
+        num_iterations = 0
         while(self.num_conflicts > 0):
             self.move()
             avg += self.num_conflicts
             if flag_print:
                 if i % 100 == 0:
-                    print(f'Swap {i}, avg conflicts: {avg/1000}')
-            avg = 0
+                    print(f'Iteration {i}, avg conflicts: {avg/100}')
+                    avg = 0
             i+=1
-        assert self.is_safe()
-        return
+            num_iterations += 1
+            if limit is not None and i > limit:
+                break
+        else:
+            assert self.is_safe()
+            return num_iterations
+        return None
 
 
 if __name__ == "__main__":
-    avg_time = 0
-    NUM_RUNS = 5
+    NUM_RUNS = 10
+    iterations = np.zeros(NUM_RUNS)
+    runtimes = np.zeros(NUM_RUNS)
+    print(f'Start of program for 1000 queens')
     for i in range(NUM_RUNS):
-        board = NQueens(beta = 1.1, N=100)
-        board.main_diagonal_initialisation()
-        print(f'---Board initialisation of size: {board.N}x{board.N}---')
+        board = NQueens(beta = 1, N=1000)
+        board.random_positions_initialisation()
+        #print(f'---Board initialisation of size: {board.N}x{board.N}---')
         # print('- Board:')
         # board.display_board()
-        print(f'- Total conflicts: {board.num_conflicts}')
+        #print(f'- Total conflicts: {board.num_conflicts}')
         start = time()
-        board.simulated_annealing(True)
+        num_iterations = board.simulated_annealing(False)
         end = time()
-        print(f'Runtime : {end-start:.3f} seconds for {board.N} queens')
-        avg_time += (end-start)
-    avg_time = avg_time/NUM_RUNS
+        if num_iterations is not None:
+            iterations[i] = num_iterations
+        print(f'Iteration {i+1} => runtime of {end-start:.3f} seconds.')
+        runtimes[i] = end-start
+    avg_time = np.mean(runtimes)
+    std_time = np.std(runtimes)
+    avg_iterations = np.mean(iterations)
+    std_iterations = np.std(iterations)
     print(f"Average elapsed time = {avg_time:.3f} seconds")
+    print(f"Standard deviation of elapsed time = {std_time:.3f} seconds")
+    print(f"Average number of iterations = {avg_iterations:.3f}")
+    print(f"Standard deviation of number of iterations = {std_iterations:.3f}")
+
+    with open('results.txt', 'w+') as f:
+        f.write(f'--- Results for 1000 queens ---\n')
     
     # print('- Final board:')
     # board.display_board()
     print('Done')
-    #print(board.q_coordinates)
 
