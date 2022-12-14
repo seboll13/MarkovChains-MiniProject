@@ -5,7 +5,56 @@ Average number of iterations = 5254.6 with std = 1410.502.
 beta = 1.0 ; initial positioning = knight
 Average elapsed time = 16.236 seconds with std = 5.013 seconds.
 Average number of iterations = 4734.8 with std = 1379.104.
-##############################beta = 1.0 ; initial positioning = random
+##############################
+beta = 1.0 ; initial positioning = random
 Average elapsed time = 17.22 seconds with std = 6.527 seconds.
 Average number of iterations = 5005.6 with std = 1771.117.
+##############################
+beta = 1.5 ; initial positioning = diagonal
+Average elapsed time = 14.137 seconds with std = 5.988 seconds.
+Average number of iterations = 4146.2 with std = 1435.265.
+##############################
+beta = 1.5 ; initial positioning = knight
+Average elapsed time = 11.739 seconds with std = 4.182 seconds.
+Average number of iterations = 3188.9 with std = 1010.619.
+##############################
+beta = 1.5 ; initial positioning = random
+Average elapsed time = 13.487 seconds with std = 3.5 seconds.
+Average number of iterations = 3683.4 with std = 822.752.
+##############################
+beta = 2.0 ; initial positioning = diagonal
+Average elapsed time = 14.977 seconds with std = 4.893 seconds.
+Average number of iterations = 4331.8 with std = 1151.906.
+##############################
+beta = 2.0 ; initial positioning = knight
+Average elapsed time = 15.242 seconds with std = 8.372 seconds.
+Average number of iterations = 3981.1 with std = 1992.568.
+##############################
+beta = 2.0 ; initial positioning = random
+Average elapsed time = 11.678 seconds with std = 3.936 seconds.
+Average number of iterations = 3176.6 with std = 895.572.
+##############################
+beta = 2.5 ; initial positioning = diagonal
+Average elapsed time = 15.143 seconds with std = 4.353 seconds.
+Average number of iterations = 4424.5 with std = 1000.848.
+##############################
+beta = 2.5 ; initial positioning = knight
+Average elapsed time = 12.776 seconds with std = 4.544 seconds.
+Average number of iterations = 3373.0 with std = 1071.303.
+##############################
+beta = 2.5 ; initial positioning = random
+Average elapsed time = 18.123 seconds with std = 6.038 seconds.
+Average number of iterations = 4679.5 with std = 1391.092.
+##############################
+beta = 3.0 ; initial positioning = diagonal
+Average elapsed time = 16.591 seconds with std = 5.054 seconds.
+Average number of iterations = 4650.0 with std = 1162.113.
+##############################
+beta = 3.0 ; initial positioning = knight
+Average elapsed time = 10.455 seconds with std = 2.435 seconds.
+Average number of iterations = 2825.2 with std = 574.968.
+##############################
+beta = 3.0 ; initial positioning = random
+Average elapsed time = 14.946 seconds with std = 5.125 seconds.
+Average number of iterations = 3954.9 with std = 1207.073.
 ##############################

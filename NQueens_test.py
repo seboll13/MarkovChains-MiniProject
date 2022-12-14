@@ -365,13 +365,13 @@ class NQueens:
 
 
 if __name__ == "__main__":
-    NUM_RUNS = 10
+    NUM_RUNS = 20
     iterations = np.zeros(NUM_RUNS)
     runtimes = np.zeros(NUM_RUNS)
-    print(f'Start of program for 1000 queens')
+    print(f'Starting test...')
     for i in range(NUM_RUNS):
-        board = NQueens(beta = 1, N=1000)
-        board.random_positions_initialisation()
+        board = NQueens(beta = 3, N=1000)
+        board.knight_initialisation()
         #print(f'---Board initialisation of size: {board.N}x{board.N}---')
         # print('- Board:')
         # board.display_board()
@@ -391,9 +391,6 @@ if __name__ == "__main__":
     print(f"Standard deviation of elapsed time = {std_time:.3f} seconds")
     print(f"Average number of iterations = {avg_iterations:.3f}")
     print(f"Standard deviation of number of iterations = {std_iterations:.3f}")
-
-    with open('results.txt', 'w+') as f:
-        f.write(f'--- Results for 1000 queens ---\n')
     
     # print('- Final board:')
     # board.display_board()
