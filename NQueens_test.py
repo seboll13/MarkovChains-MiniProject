@@ -350,10 +350,9 @@ class NQueens:
         while(self.num_conflicts > 0):
             self.move()
             avg += self.num_conflicts
-            if flag_print:
-                if i % 100 == 0:
-                    print(f'Iteration {i}, avg conflicts: {avg/100}')
-                    avg = 0
+            if i % 100 == 0:
+                print(f'Swap {i}, avg conflicts: {avg/100}')
+                avg = 0
             i+=1
             num_iterations += 1
             if limit is not None and i > limit:
