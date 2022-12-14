@@ -1,0 +1,11 @@
+beta = 1.0 ; initial positioning = diagonal
+Average elapsed time = 17.032 seconds with std = 5.201 seconds.
+Average number of iterations = 5254.6 with std = 1410.502.
+##############################
+beta = 1.0 ; initial positioning = knight
+Average elapsed time = 16.236 seconds with std = 5.013 seconds.
+Average number of iterations = 4734.8 with std = 1379.104.
+##############################beta = 1.0 ; initial positioning = random
+Average elapsed time = 17.22 seconds with std = 6.527 seconds.
+Average number of iterations = 5005.6 with std = 1771.117.
+##############################
