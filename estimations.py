@@ -3,12 +3,6 @@ from time import time
 from NQueens_test import NQueens
 from math import log, exp
 
-MAX_T = 2.0
-NUM_QUEENS = 100
-NUM_ITERATIONS_CHAIN = 5000
-M = 20
-delta_beta = 0.5
-
 # APPROXIMATION TO NB OF VALID SOLUTIONS = (0.143 * N)^N
 
 
@@ -62,17 +56,6 @@ class NQueens:
         return True
     
 
-    # default initialisation (most likely not optimal)
-    def main_diagonal_initialisation(self) -> tuple:
-        """ This function initialises the board with all the queens on the main diagonal. """
-        self.q_coordinates = np.array([(i,i) for i in range(self.N)])
-        self.q_indices = np.array([i*(self.N + 1) for i in range(self.N)])
-        self.num_conflicts = self.N * (self.N - 1)
-        self.conflicting_queens = {_: self.N-1 for _ in range(self.N)}
-        assert self.is_safe()
-        return (self.q_coordinates, self.q_indices)
-    
-
     def random_positions_initialisation(self) -> tuple:
         """ This function randomly puts queens on the board, whilst preserving the no row/column conflict contraint. """
         a, b = np.arange(self.N), np.arange(self.N)
@@ -80,32 +63,6 @@ class NQueens:
         np.random.shuffle(b)
         self.q_coordinates = np.array([(a[i], b[i]) for i in range(self.N)])
         self.q_indices = np.array([a[i] + i*self.N for i in range(self.N)])
-        self.num_conflicts = self.diagonal_conflict_calculator()
-        self.conflicting_queens = {_:self.single_queen_initial_conflicts(_) for _ in range(self.N)}
-        assert self.is_safe()
-        return (self.q_coordinates, self.q_indices)
-    
-
-    def default_se_knight_movement(self, x, y) -> tuple:
-        """ This function returns a fixed new position from an initial starting position with respect to the south-east knight movement. """
-        if self.N % 2 == 0 and y == self.N - 2:
-            return (x+1, 1)
-        return (x+1, (y+2) % self.N)
-
-    
-    # better initialisation based on knight movements
-    # right now, the initialisation is fixed
-    def knight_initialisation(self) -> tuple:
-        """ This function initialises the board with queens positioned using knight movements."""
-        # initialise the first queen's position at (0,0)
-        self.q_coordinates = np.array([(0,0)])
-        self.q_indices = np.array([0])
-        # place the remaining queens using knight movements
-        x, y = 0, 0
-        for i in range(1, self.N):
-            x, y = self.default_se_knight_movement(x, y)
-            self.q_coordinates = np.append(self.q_coordinates, [(x, y)], axis=0)
-            self.q_indices = np.append(self.q_indices, [x + i*self.N])
         self.num_conflicts = self.diagonal_conflict_calculator()
         self.conflicting_queens = {_:self.single_queen_initial_conflicts(_) for _ in range(self.N)}
         assert self.is_safe()
@@ -211,29 +168,6 @@ class NQueens:
 
         return (conflicts)
 
-    
-    def display_board(self) -> None:
-        """ This function displays the board."""
-        # print the board
-        # 0 = empty square, 1 = queen
-        # if the queen is conflicting with another, print it red
-        board = np.zeros((self.N, self.N))
-        for i in range(self.N):
-            board[self.q_coordinates[i][0], self.q_coordinates[i][1]] = 1
-        qid = 0
-        for i in range(self.N):
-            for j in range(self.N):
-                if board[i, j] == 1:
-                    # check for conflict
-                    if self.single_queen_conflict_calculator(qid)[0] > 0:
-                        print(bcolors.FAIL + '1' + bcolors.ENDC, end=' ')
-                    else:
-                        print(bcolors.OKGREEN + '1' + bcolors.ENDC, end=' ')
-                    qid += 1
-                else:
-                    print("0", end=" ")
-            print()
-        return
     
     def reupdate_1(self,q1,q2):
 
@@ -358,6 +292,12 @@ class NQueens:
 
 
 if __name__ == "__main__":
+    MAX_T = 2.0
+    NUM_QUEENS = 12
+    NUM_ITERATIONS_CHAIN = 3000
+    M = 40
+    delta_beta = 0.2
+
     ratios = [] #list of ratios
     betas = [0]
     flag_beta = True
@@ -372,7 +312,7 @@ if __name__ == "__main__":
         #run the metropolis algo M times: the greater M the better the approximation (central limit theorem)
         while(j < M):
             print("Trial",j)
-            board = NQueens(beta = betas[i], N=12)
+            board = NQueens(beta = betas[i], N=NUM_QUEENS)
             board.random_positions_initialisation()
             k = 0
             #run the chain for NUM_ITERATIONS_CHAIN times
@@ -411,6 +351,6 @@ if __name__ == "__main__":
     
     print("betas =",betas)
     print("ratios =", ratios)
-    print(num_solutions)
+    print("solutions =", num_solutions)
 
     print('Done')

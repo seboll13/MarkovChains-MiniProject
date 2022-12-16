@@ -361,15 +361,36 @@ class NQueens:
             assert self.is_safe()
             return num_iterations
         return None
+    
+
+    def write_positions(self, filename) -> None:
+        with open(filename, 'w') as f:
+            # write (x,y) positions of all queens
+            for q in self.q_coordinates:
+                f.write(f'{q[0]},{q[1]}\n')
+        return
 
 
-if __name__ == "__main__":
+def main_for_one_solution(beta, NUM_QUEENS):
+    print(f'Starting run...')
+    board = NQueens(beta=beta, N=NUM_QUEENS)
+    board.random_positions_initialisation()
+    start = time()
+    num_iterations = board.simulated_annealing(True)
+    end = time()
+    board.write_positions('positions.csv')
+    print(f'Runtime of {end-start:.3f} seconds')
+    print(f'Number of iterations: {num_iterations}')
+    print('Done')
+
+
+def main_for_multiple_solutions(beta, NUM_QUEENS):
     NUM_RUNS = 20
     iterations = np.zeros(NUM_RUNS)
     runtimes = np.zeros(NUM_RUNS)
     print(f'Starting test...')
     for i in range(NUM_RUNS):
-        board = NQueens(beta = 3, N=1000)
+        board = NQueens(beta = beta, N=NUM_QUEENS)
         board.knight_initialisation()
         #print(f'---Board initialisation of size: {board.N}x{board.N}---')
         # print('- Board:')
@@ -395,3 +416,8 @@ if __name__ == "__main__":
     # board.display_board()
     print('Done')
 
+
+if __name__ == "__main__":
+    _beta, NUM_QUEENS = 2.5, 1000
+    main_for_one_solution(_beta, NUM_QUEENS)
+    #main_for_multiple_solutions(_beta, NUM_QUEENS)
