@@ -314,53 +314,52 @@ def fact(n):
 
 def create_queen_solutions_dict():
     queen_dict = {}
-    with open("queen_dict.txt", "r") as f:
+    with open("queen_solutions.txt", "r") as f:
         for line in f:
-            (key, val) = line.split(', ')
+            (key, val) = line.split(',')
             queen_dict[int(key)] = int(val)
     return queen_dict
 
 
 if __name__ == "__main__":
-    MAX_T = 2.0
-    NUM_QUEENS = 12
     NUM_ITERATIONS_CHAIN = 4000
-    SUPP_ITERATIONS = int(NUM_ITERATIONS_CHAIN / 10)
-    M = 200
+    M = 4
     delta_beta = 0.5
 
-    ratios = [] #list of ratios
-    betas = [0]
-    flag_beta = True
-    i = 0
-    num_solutions = fact(NUM_QUEENS)
     #iterate through every beta until beta_star is found (and therefore flag_beta becomes false)
-    while flag_beta:
-        j = 0
-        somma = 0
-        print("Started calculations for beta =",betas[i])
-        #run the metropolis algo M times: the greater M the better the approximation (central limit theorem)
-        while(j < M):
-            #print("Trial",j)
-            board = NQueens(beta = betas[i], N=NUM_QUEENS)
-            board.random_positions_initialisation()
-            k = 0
-            #run the chain for NUM_ITERATIONS_CHAIN times
-            while(k < NUM_ITERATIONS_CHAIN):
-                board.move()
-                k += 1
-            somma += exp(-delta_beta*board.num_conflicts)
-            j += 1
-        somma /= M
-        ratios.append(somma)
-        num_solutions *= somma
-        print("beta =", betas[i], "total number of solutions =", num_solutions)
-        # if at least 90% of the M times the chain had at least 95% of zero cost function, then we reached beta_star
-        if num_solutions < 5000:
-            flag_beta = False
-        else:
-            betas.append(betas[i]+delta_beta)
-            i += 1
+    for NUM_QUEENS in range(4+1,26+1):
+        print('Started calculations for NUM_QUEENS =',NUM_QUEENS)
+        num_solutions = fact(NUM_QUEENS)
+        ratios = [] #list of ratios
+        betas = [0]
+        flag_beta = True
+        i = 0
+        queen_dict = create_queen_solutions_dict()
+        while flag_beta:
+            j = 0
+            somma = 0
+            #run the metropolis algo M times: the greater M the better the approximation (central limit theorem)
+            while(j < M):
+                #print("Trial",j)
+                board = NQueens(beta = betas[i], N=NUM_QUEENS)
+                board.random_positions_initialisation()
+                k = 0
+                #run the chain for NUM_ITERATIONS_CHAIN times
+                while(k < NUM_ITERATIONS_CHAIN):
+                    board.move()
+                    k += 1
+                somma += exp(-delta_beta*board.num_conflicts)
+                j += 1
+            somma /= M
+            ratios.append(somma)
+            num_solutions *= somma
+            print("Num queens =",NUM_QUEENS,"beta =", betas[i], "total number of solutions =", num_solutions)
+            # if at least 90% of the M times the chain had at least 95% of zero cost function, then we reached beta_star
+            if num_solutions < queen_dict[NUM_QUEENS]*0.9:
+                flag_beta = False
+            else:
+                betas.append(betas[i]+delta_beta)
+                i += 1
     
     print("betas =",betas)
     print("ratios =", ratios)
