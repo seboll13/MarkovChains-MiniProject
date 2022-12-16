@@ -232,22 +232,25 @@ class NQueens:
         # 2) calculate the acceptance probability by using the conflict function
         # 3) check if the move has to be done
 
-        p1, p2 = 0.9, 0.99
+        p1, p2 = 0.8, 0.9
         q = np.random.uniform(0, 1)
-        if len(self.conflicting_queens) >= 2:
-            if q < p1 or len(self.non_conflicting_queens) < 2:
+        if len(self.conflicting_queens) >= 2 and len(self.non_conflicting_queens) >= 2:
+            if q < p1:
                 q1_id, q2_id = np.random.choice(list(self.conflicting_queens.keys()), 2, replace=False)
-                prob_xy = 0.9
+                prob_xy = p1
             elif q < p2:
                 q1_id = np.random.choice(list(self.conflicting_queens.keys()))
                 q2_id = np.random.choice(list(self.non_conflicting_queens.keys()))
-                prob_xy = 0.09
+                prob_xy = p2-p1
             else:
                 q1_id, q2_id = np.random.choice(list(self.non_conflicting_queens.keys()), 2, replace=False)
-                prob_xy = 0.01
+                prob_xy = 1-p2
         else:
+            if len(self.conflicting_queens) == 0:
                 q1_id, q2_id = np.random.choice(list(self.non_conflicting_queens.keys()), 2, replace=False)
-                prob_xy = 0.01
+            else:
+                q1_id,q2_id = np.random.choice(list(self.conflicting_queens.keys()), 2, replace=False)
+            prob_xy = 1
 
         r1_old, c1_old = self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1]
         r2_old, c2_old = self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1]
@@ -266,12 +269,15 @@ class NQueens:
         new_conflict_q1 = self.single_queen_conflict_calculator_q1(q1_id,"new_queen_position")
         new_conflict_q2 = self.single_queen_conflict_calculator_q2(q1_id, q2_id,"new_queen_position")
 
-        if q1_id in self.conflicting_queens and q2_id in self.conflicting_queens:
-            prob_yx = 0.9
-        elif q1_id in self.non_conflicting_queens and q2_id in self.non_conflicting_queens:
-            prob_yx = 0.01
+        if len(self.conflicting_queens) >= 2 and len(self.non_conflicting_queens) >= 2:
+            if q1_id in self.conflicting_queens and q2_id in self.conflicting_queens:
+                prob_yx = p1
+            elif q1_id in self.non_conflicting_queens and q2_id in self.non_conflicting_queens:
+                prob_yx = 1-p2
+            else:
+                prob_yx = p2-p1
         else:
-            prob_yx = 0.09
+            prob_yx = 1
 
         eventual_conflict += 2*(new_conflict_q1 + new_conflict_q2)
         if -self.beta*(eventual_conflict-self.num_conflicts)+ log(prob_yx/prob_xy)> 0:
@@ -291,12 +297,20 @@ class NQueens:
         return
 
 
+def fact(n):
+    if n == 0:
+        return 1
+    else:
+        return n * fact(n-1)
+
+
 if __name__ == "__main__":
     MAX_T = 2.0
     NUM_QUEENS = 12
-    NUM_ITERATIONS_CHAIN = 3000
-    M = 40
-    delta_beta = 0.2
+    NUM_ITERATIONS_CHAIN = 4000
+    SUPP_ITERATIONS = int(NUM_ITERATIONS_CHAIN / 10)
+    M = 100
+    delta_beta = 0.5
 
     ratios = [] #list of ratios
     betas = [0]
@@ -307,8 +321,8 @@ if __name__ == "__main__":
     while flag_beta:
         j = 0
         somma = 0
-        print("Started calculations for beta =",betas[i])
         cnt_beta = 0
+        print("Started calculations for beta =",betas[i])
         #run the metropolis algo M times: the greater M the better the approximation (central limit theorem)
         while(j < M):
             print("Trial",j)
@@ -322,29 +336,30 @@ if __name__ == "__main__":
             k = 0
             cnt = 0
             #run the chain for other 200 times to check if the current beta is beta_star
-            while (k < 200):
+            while (k < SUPP_ITERATIONS):
                 board.move()
-                k += 1
                 if board.num_conflicts == 0:
                     cnt += 1
+                k += 1
             
-            if cnt >= 198:
+            if cnt >= SUPP_ITERATIONS*0.95:
                 cnt_beta += 1 # counter used to check if we reached beta_star
             somma += exp(-delta_beta*board.num_conflicts)
             j += 1
         
         ratios.append(somma/M)
 
-        if cnt_beta >= 0.9*M: # if at least 90% of the M times the chain had at least 99% of zero cost function,
-                              #then we reached beta_star
+        # if at least 90% of the M times the chain had at least 95% of zero cost function, then we reached beta_star
+        if cnt_beta >= 0.9*M:
             flag_beta = False
             #now find the ratio Z_beta_star/Z_beta_zero
             num_solutions = 1
             for index in range(len(ratios)-1):
                 num_solutions *= ratios[index]
             #now multiply the ratio Z_beta_star/Z_beta_zero by N! to find the total number of solutions
-            for num in range(1,board.N+1):
-                num_solutions *= num
+            num_solutions *= fact(NUM_QUEENS)
+            # for num in range(1,board.N+1):
+            #     num_solutions *= num
         else:
             betas.append(betas[i]+delta_beta)
             i += 1
