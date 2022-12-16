@@ -286,18 +286,26 @@ class NQueens:
         # 2) calculate the acceptance probability by using the conflict function
         # 3) check if the move has to be done
 
-        p1, p2 = 0.9, 0.99
+        p1, p2 = 0.8, 0.9
         q = np.random.uniform(0, 1)
-        if q < p1 or len(self.non_conflicting_queens) < 2:
-            q1_id, q2_id = np.random.choice(list(self.conflicting_queens.keys()), 2, replace=False)
-            prob_xy = 0.9
-        elif q < p2:
-            q1_id = np.random.choice(list(self.conflicting_queens.keys()))
-            q2_id = np.random.choice(list(self.non_conflicting_queens.keys()))
-            prob_xy = 0.09
+        assert len(self.conflicting_queens) != 1
+        if len(self.conflicting_queens) >= 2 and len(self.non_conflicting_queens) >= 2:
+            if q < p1:
+                q1_id, q2_id = np.random.choice(list(self.conflicting_queens.keys()), 2, replace=False)
+                prob_xy = p1
+            elif q < p2:
+                q1_id = np.random.choice(list(self.conflicting_queens.keys()))
+                q2_id = np.random.choice(list(self.non_conflicting_queens.keys()))
+                prob_xy = p2-p1
+            else:
+                q1_id, q2_id = np.random.choice(list(self.non_conflicting_queens.keys()), 2, replace=False)
+                prob_xy = 1-p2
         else:
-            q1_id, q2_id = np.random.choice(list(self.non_conflicting_queens.keys()), 2, replace=False)
-            prob_xy = 0.01
+            if len(self.conflicting_queens) == 0:
+                q1_id, q2_id = np.random.choice(list(self.non_conflicting_queens.keys()), 2, replace=False)
+            else:
+                q1_id,q2_id = np.random.choice(list(self.conflicting_queens.keys()), 2, replace=False)
+            prob_xy = 1
 
         r1_old, c1_old = self.q_coordinates[q1_id][0], self.q_coordinates[q1_id][1]
         r2_old, c2_old = self.q_coordinates[q2_id][0], self.q_coordinates[q2_id][1]
@@ -316,12 +324,15 @@ class NQueens:
         new_conflict_q1 = self.single_queen_conflict_calculator_q1(q1_id,"new_queen_position")
         new_conflict_q2 = self.single_queen_conflict_calculator_q2(q1_id, q2_id,"new_queen_position")
 
-        if q1_id in self.conflicting_queens and q2_id in self.conflicting_queens:
-            prob_yx = 0.9
-        elif q1_id in self.non_conflicting_queens and q2_id in self.non_conflicting_queens:
-            prob_yx = 0.01
+        if len(self.conflicting_queens) >= 2 and len(self.non_conflicting_queens) >= 2:
+            if q1_id in self.conflicting_queens and q2_id in self.conflicting_queens:
+                prob_yx = p1
+            elif q1_id in self.non_conflicting_queens and q2_id in self.non_conflicting_queens:
+                prob_yx = 1-p2
+            else:
+                prob_yx = p2-p1
         else:
-            prob_yx = 0.09
+            prob_yx = 1
 
         eventual_conflict += 2*(new_conflict_q1 + new_conflict_q2)
         if -self.beta*(eventual_conflict-self.num_conflicts)+ log(prob_yx/prob_xy)> 0:
@@ -391,7 +402,7 @@ def main_for_multiple_solutions(beta, NUM_QUEENS):
     print(f'Starting test...')
     for i in range(NUM_RUNS):
         board = NQueens(beta = beta, N=NUM_QUEENS)
-        board.knight_initialisation()
+        board.random_positions_initialisation()
         #print(f'---Board initialisation of size: {board.N}x{board.N}---')
         # print('- Board:')
         # board.display_board()
@@ -419,5 +430,5 @@ def main_for_multiple_solutions(beta, NUM_QUEENS):
 
 if __name__ == "__main__":
     _beta, NUM_QUEENS = 2.5, 1000
-    main_for_one_solution(_beta, NUM_QUEENS)
-    #main_for_multiple_solutions(_beta, NUM_QUEENS)
+    #main_for_one_solution(_beta, NUM_QUEENS)
+    main_for_multiple_solutions(_beta, NUM_QUEENS)
