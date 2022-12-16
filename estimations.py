@@ -295,7 +295,7 @@ if __name__ == "__main__":
     MAX_T = 2.0
     NUM_QUEENS = 12
     NUM_ITERATIONS_CHAIN = 3000
-    M = 40
+    M = 200
     delta_beta = 0.2
 
     ratios = [] #list of ratios
