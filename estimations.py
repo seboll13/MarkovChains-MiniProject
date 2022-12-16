@@ -312,6 +312,15 @@ def fact(n):
         return n * fact(n-1)
 
 
+def create_queen_solutions_dict():
+    queen_dict = {}
+    with open("queen_dict.txt", "r") as f:
+        for line in f:
+            (key, val) = line.split(', ')
+            queen_dict[int(key)] = int(val)
+    return queen_dict
+
+
 if __name__ == "__main__":
     MAX_T = 2.0
     NUM_QUEENS = 12
