@@ -458,7 +458,7 @@ def main_for_multiple_solutions_for_plotting(beta, NUM_QUEENS):
     NUM_RUNS = 100
     iterations = np.zeros(NUM_RUNS)
     runtimes = np.zeros(NUM_RUNS)
-    for i in range(NUM_RUNS):
+    for i in tqdm(range(NUM_RUNS)):
         board = NQueens(beta = beta, N=NUM_QUEENS)
         board.random_positions_initialisation()
         iterations[i] = board.simulated_annealing(False)
@@ -470,9 +470,10 @@ def main_for_multiple_solutions_for_plotting(beta, NUM_QUEENS):
 if __name__ == "__main__":
     NUM_QUEENS = 50
     #main_for_one_solution(_beta, NUM_QUEENS)
-    beta_list = [0.5,1,1.5,2,2.5,3,3.5,4]
+    beta_list = [1,1.25,1.5,1.75,2,2.25,2.5,2.75,3,3.25,3.5,3.75,4,4.25,4.5]
     iteration_list = []
-    for _beta in tqdm(beta_list):
+    for _beta in beta_list:
+        print("start calculations for beta =",_beta)
         iteration_list.append(main_for_multiple_solutions_for_plotting(_beta, NUM_QUEENS))
     print(beta_list)
     print(iteration_list)
