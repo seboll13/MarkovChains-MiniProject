@@ -1,6 +1,8 @@
 import numpy as np
 from math import exp, log
 from time import time
+import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 '''
 @todo
@@ -338,7 +340,7 @@ class NQueens:
         if -self.beta*(eventual_conflict-self.num_conflicts)+ log(prob_yx/prob_xy)> 0:
             a = 1 # acceptance probability
         else:
-            a = exp(-self.beta*(eventual_conflict-self.num_conflicts)) # acceptance probability
+            a = exp(-self.beta*(eventual_conflict-self.num_conflicts))*prob_yx/prob_xy # acceptance probability
 
         if (np.random.uniform() < a):
             # in this case the move is made
@@ -361,9 +363,11 @@ class NQueens:
         while(self.num_conflicts > 0):
             self.move()
             avg += self.num_conflicts
+            '''
             if i % 100 == 0:
                 print(f'Swap {i}, avg conflicts: {avg/100}')
                 avg = 0
+            '''
             i+=1
             num_iterations += 1
             if limit is not None and i > limit:
@@ -381,6 +385,24 @@ class NQueens:
                 f.write(f'{q[0]},{q[1]}\n')
         return
 
+    def check_board(self) -> bool:
+        for i in range(self.N):
+            for j in range(self.N):
+                if j != i:
+                #controllo su riga
+                    if self.q_coordinates[i][0] == self.q_coordinates[j][0]:
+                        print("1")
+                        return False
+                    #controllo su colonna
+                    if self.q_coordinates[i][1] == self.q_coordinates[j][1]:
+                        print("2")
+                        return False
+                    #controllo su diagonali
+                    if abs(self.q_coordinates[i][0]-self.q_coordinates[j][0]) == abs(self.q_coordinates[i][1]-self.q_coordinates[j][1]):
+                        print("3")
+                        return False
+        return True
+
 
 def main_for_one_solution(beta, NUM_QUEENS):
     print(f'Starting run...')
@@ -389,6 +411,10 @@ def main_for_one_solution(beta, NUM_QUEENS):
     start = time()
     num_iterations = board.simulated_annealing(True)
     end = time()
+    if board.check_board() == False:
+        print("merdina")
+    else:
+        print("dai cazzo")
     board.write_positions('positions.csv')
     print(f'Runtime of {end-start:.3f} seconds')
     print(f'Number of iterations: {num_iterations}')
@@ -396,7 +422,7 @@ def main_for_one_solution(beta, NUM_QUEENS):
 
 
 def main_for_multiple_solutions(beta, NUM_QUEENS):
-    NUM_RUNS = 20
+    NUM_RUNS = 100
     iterations = np.zeros(NUM_RUNS)
     runtimes = np.zeros(NUM_RUNS)
     print(f'Starting test...')
@@ -426,9 +452,34 @@ def main_for_multiple_solutions(beta, NUM_QUEENS):
     # print('- Final board:')
     # board.display_board()
     print('Done')
+    return avg_iterations
+
+def main_for_multiple_solutions_for_plotting(beta, NUM_QUEENS):
+    NUM_RUNS = 100
+    iterations = np.zeros(NUM_RUNS)
+    runtimes = np.zeros(NUM_RUNS)
+    for i in range(NUM_RUNS):
+        board = NQueens(beta = beta, N=NUM_QUEENS)
+        board.random_positions_initialisation()
+        iterations[i] = board.simulated_annealing(False)
+    avg_iterations = np.mean(iterations)
+    print('Done')
+    return avg_iterations
 
 
 if __name__ == "__main__":
-    _beta, NUM_QUEENS = 2.5, 1000
+    NUM_QUEENS = 50
     #main_for_one_solution(_beta, NUM_QUEENS)
-    main_for_multiple_solutions(_beta, NUM_QUEENS)
+    beta_list = [0.5,1,1.5,2,2.5,3,3.5,4]
+    iteration_list = []
+    for _beta in tqdm(beta_list):
+        iteration_list.append(main_for_multiple_solutions_for_plotting(_beta, NUM_QUEENS))
+    print(beta_list)
+    print(iteration_list)
+
+    plt.plot(beta_list,iteration_list,'--ro')
+    plt.xlabel("beta")
+    plt.ylabel("average number of iterations")
+    stringa = str(NUM_QUEENS)+' queens'
+    plt.title(stringa)
+    plt.show()
