@@ -470,7 +470,7 @@ def main_for_multiple_solutions_for_plotting(beta, NUM_QUEENS):
 if __name__ == "__main__":
     NUM_QUEENS = 50
     #main_for_one_solution(_beta, NUM_QUEENS)
-    beta_list = [1,1.25,1.5,1.75,2,2.25,2.5,2.75,3,3.25,3.5,3.75,4,4.25,4.5]
+    beta_list = [0.75,1,1.25,1.5,1.75,2,2.25,2.5,2.75,3,3.25,3.5,3.75,4,4.25,4.5,4.75,5]
     iteration_list = []
     for _beta in beta_list:
         print("start calculations for beta =",_beta)
@@ -483,4 +483,6 @@ if __name__ == "__main__":
     plt.ylabel("average number of iterations")
     stringa = str(NUM_QUEENS)+' queens'
     plt.title(stringa)
-    plt.show()
+    #plt.show()
+    stringa = '/content/drive/MyDrive/'+str(NUM_QUEENS)+'_queens.png'
+    plt.savefig(stringa)
