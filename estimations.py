@@ -2,6 +2,8 @@ import numpy as np
 from time import time
 from NQueens_test import NQueens
 from math import log, exp
+from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 # APPROXIMATION TO NB OF VALID SOLUTIONS = (0.143 * N)^N
 
@@ -322,53 +324,62 @@ def create_queen_solutions_dict():
 
 
 if __name__ == "__main__":
-    NUM_ITERATIONS_CHAIN = 4000
-    M = 100
+    NUM_ITERATIONS_CHAIN = 1000
+    M = 5
+    NUM_QUEENS = 8
     delta_beta = 0.5
 
     #iterate through every beta until beta_star is found (and therefore flag_beta becomes false)
-    for NUM_QUEENS in range(4,26+1):
-        with open('estimations.txt', 'a') as f:
-            f.write('###### QUEEN n°: ' + str(NUM_QUEENS) + ' ######\n')
-        print('Started calculations for NUM_QUEENS =',NUM_QUEENS)
-        num_solutions = fact(NUM_QUEENS)
-        ratios = [] #list of ratios
-        betas = [0]
-        flag_beta = True
-        i = 0
-        queen_dict = create_queen_solutions_dict()
-        while flag_beta:
-            j = 0
-            somma = 0
-            #run the metropolis algo M times: the greater M the better the approximation (central limit theorem)
-            while(j < M):
-                #print("Trial",j)
-                board = NQueens(beta = betas[i], N=NUM_QUEENS)
-                board.random_positions_initialisation()
-                k = 0
-                #run the chain for NUM_ITERATIONS_CHAIN times
-                while(k < NUM_ITERATIONS_CHAIN):
-                    board.move()
-                    k += 1
-                somma += exp(-delta_beta*board.num_conflicts)
-                j += 1
-            somma /= M
-            ratios.append(somma)
-            num_solutions *= somma
-            with open('estimations.txt', 'a') as f:
-                f.write(f'Num queens = {NUM_QUEENS}, beta = {betas[i]}, total number of solutions = {num_solutions}\n')
-            # if at least 90% of the M times the chain had at least 95% of zero cost function, then we reached beta_star
-            if num_solutions < queen_dict[NUM_QUEENS]*0.9:
-                flag_beta = False
-            else:
-                betas.append(betas[i]+delta_beta)
-                i += 1
-            print('Done for beta = ',betas[i])
     
-    with open('estimations.txt', 'a') as f:
-        f.write('betas = %s, ratios = %s, total number of solutions = %d\n', (betas, ratios, num_solutions))
-    # print("betas =",betas)
-    # print("ratios =", ratios)
-    # print("solutions =", num_solutions)
+    print('Started calculations for NUM_QUEENS =',NUM_QUEENS)
+    num_solutions_list = []
+    num_solutions = fact(NUM_QUEENS)
+    ratios = [] #list of ratios
+    betas = [0]
+    flag_beta = True
+    i = 0
+    queen_dict = create_queen_solutions_dict()
+    while flag_beta:
+        j = 0
+        somma = 0
+        #run the metropolis algo M times: the greater M the better the approximation (central limit theorem)
+        while(j < M):
+            #print("Trial",j)
+            board = NQueens(beta = betas[i], N=NUM_QUEENS)
+            board.random_positions_initialisation()
+            k = 0
+            #run the chain for NUM_ITERATIONS_CHAIN times
+            while(k < NUM_ITERATIONS_CHAIN):
+                board.move()
+                k += 1
+            somma += exp(-delta_beta*board.num_conflicts)
+            j += 1
+        somma /= M
+        ratios.append(somma)
+        num_solutions *= somma
+        num_solutions_list.append(num_solutions)
+        print("Num queens =",NUM_QUEENS,"beta =", betas[i], "total number of solutions =", num_solutions)
+        
+        if num_solutions < queen_dict[NUM_QUEENS]*0.5:
+            flag_beta = False
+        else:
+            betas.append(betas[i]+delta_beta)
+            i += 1
+
+    num_solutions_list = np.array(num_solutions_list)
+    best_beta_index = (np.abs(num_solutions_list - queen_dict[NUM_QUEENS])).argmin()
+    best_beta = betas[best_beta_index]
+    best_solution = num_solutions_list[best_beta_index]
+    stringa = 'Best solution = '+str(best_solution)+' at beta = '+str(best_beta)
+    print(stringa)
+
+    plt.plot(betas,np.log(num_solutions_list),'--ro',label = 'experimental values')
+    plt.axhline(y = np.log(queen_dict[NUM_QUEENS]), xmin = betas[0], xmax =betas[i], color = 'b', linestyle = '-',label = 'real value')
+    plt.xlabel(r"$\beta_{t}$")
+    plt.ylabel(r"$\log(Z_{\beta_{t}})$, $\log(Z_{\beta_{\infty}})$")
+    plt.legend()
+    stringa = 'Empirical and real number of solutions for '+str(NUM_QUEENS)+' queens'
+    plt.title(stringa)
+    plt.show()
 
     print('Done')
