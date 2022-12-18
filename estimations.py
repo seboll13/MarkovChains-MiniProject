@@ -326,7 +326,7 @@ def create_queen_solutions_dict():
 if __name__ == "__main__":
     NUM_ITERATIONS_CHAIN = 2000
     M = 100
-    NUM_QUEENS = 16
+    NUM_QUEENS = 23
     delta_beta = 0.25
 
     #iterate through every beta until beta_star is found (and therefore flag_beta becomes false)
