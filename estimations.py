@@ -324,10 +324,10 @@ def create_queen_solutions_dict():
 
 
 if __name__ == "__main__":
-    NUM_ITERATIONS_CHAIN = 1000
-    M = 5
-    NUM_QUEENS = 8
-    delta_beta = 0.5
+    NUM_ITERATIONS_CHAIN = 2000
+    M = 100
+    NUM_QUEENS = 16
+    delta_beta = 0.25
 
     #iterate through every beta until beta_star is found (and therefore flag_beta becomes false)
     
@@ -370,7 +370,8 @@ if __name__ == "__main__":
     best_beta_index = (np.abs(num_solutions_list - queen_dict[NUM_QUEENS])).argmin()
     best_beta = betas[best_beta_index]
     best_solution = num_solutions_list[best_beta_index]
-    stringa = 'Best solution = '+str(best_solution)+' at beta = '+str(best_beta)
+    relative_error = (np.abs(queen_dict[NUM_QUEENS]-best_solution))/queen_dict[NUM_QUEENS]
+    stringa = 'Best solution = '+str(best_solution)+' at beta = '+str(best_beta)+' relative error = '+str(relative_error*100)+'%'
     print(stringa)
 
     plt.plot(betas,np.log(num_solutions_list),'--ro',label = 'experimental values')
@@ -380,6 +381,7 @@ if __name__ == "__main__":
     plt.legend()
     stringa = 'Empirical and real number of solutions for '+str(NUM_QUEENS)+' queens'
     plt.title(stringa)
-    plt.show()
+    stringa = '/content/drive/MyDrive/'+str(NUM_QUEENS)+'queens_logbeta.png'
+    plt.savefig(stringa)
 
     print('Done')
