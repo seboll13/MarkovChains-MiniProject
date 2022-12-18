@@ -323,11 +323,13 @@ def create_queen_solutions_dict():
 
 if __name__ == "__main__":
     NUM_ITERATIONS_CHAIN = 4000
-    M = 4
+    M = 100
     delta_beta = 0.5
 
     #iterate through every beta until beta_star is found (and therefore flag_beta becomes false)
-    for NUM_QUEENS in range(4+1,26+1):
+    for NUM_QUEENS in range(4,26+1):
+        with open('estimations.txt', 'a') as f:
+            f.write('###### QUEEN n°: ' + str(NUM_QUEENS) + ' ######\n')
         print('Started calculations for NUM_QUEENS =',NUM_QUEENS)
         num_solutions = fact(NUM_QUEENS)
         ratios = [] #list of ratios
@@ -353,16 +355,20 @@ if __name__ == "__main__":
             somma /= M
             ratios.append(somma)
             num_solutions *= somma
-            print("Num queens =",NUM_QUEENS,"beta =", betas[i], "total number of solutions =", num_solutions)
+            with open('estimations.txt', 'a') as f:
+                f.write(f'Num queens = {NUM_QUEENS}, beta = {betas[i]}, total number of solutions = {num_solutions}\n')
             # if at least 90% of the M times the chain had at least 95% of zero cost function, then we reached beta_star
             if num_solutions < queen_dict[NUM_QUEENS]*0.9:
                 flag_beta = False
             else:
                 betas.append(betas[i]+delta_beta)
                 i += 1
+            print('Done for beta = ',betas[i])
     
-    print("betas =",betas)
-    print("ratios =", ratios)
-    print("solutions =", num_solutions)
+    with open('estimations.txt', 'a') as f:
+        f.write('betas = %s, ratios = %s, total number of solutions = %d\n', (betas, ratios, num_solutions))
+    # print("betas =",betas)
+    # print("ratios =", ratios)
+    # print("solutions =", num_solutions)
 
     print('Done')
