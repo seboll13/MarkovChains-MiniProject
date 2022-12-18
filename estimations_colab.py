@@ -316,7 +316,7 @@ def fact(n):
 
 def create_queen_solutions_dict():
     queen_dict = {}
-    with open("queen_solutions.txt", "r") as f:
+    with open("/content/drive/MyDrive/queen_solutions.txt", "r") as f:
         for line in f:
             (key, val) = line.split(',')
             queen_dict[int(key)] = int(val)
@@ -327,7 +327,7 @@ if __name__ == "__main__":
     NUM_ITERATIONS_CHAIN = 2000
     M = 100
     NUM_QUEENS = 16
-    delta_beta = 0.25
+    delta_beta = 0.5
 
     #iterate through every beta until beta_star is found (and therefore flag_beta becomes false)
     
@@ -381,5 +381,7 @@ if __name__ == "__main__":
     plt.legend()
     stringa = 'Empirical and real number of solutions for '+str(NUM_QUEENS)+' queens'
     plt.title(stringa)
+    stringa = '/content/drive/MyDrive/'+str(NUM_QUEENS)+'queens_logbeta.png'
+    plt.savefig(stringa)
 
     print('Done')
